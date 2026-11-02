@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/dueno_db}
+    username: ${DB_USERNAME:patitas}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+
+info:
+  app:
+    name: ms-dueno
+    description: Microservicio de gestión de dueños - Patitas Felices
+    version: 1.0.0
