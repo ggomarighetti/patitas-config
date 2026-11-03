@@ -16,10 +16,14 @@ spring:
             locator:
               enabled: true
               lower-case-service-id: true
-              include-expression: "serviceId matches '(?i)ms-.*' and !(serviceId matches '(?i)ms-turno')"
+              include-expression: "serviceId matches '(?i)ms-.*' and !(serviceId matches '(?i)ms-(turno|auth)')"
           default-filters:
             - RewriteLocationResponseHeader=NEVER_STRIP, Location, ,
           routes:
+            - id: ms-auth
+              uri: lb://ms-auth
+              predicates:
+                - Path=/auth/**
             - id: ms-dueno
               uri: lb://ms-dueno
               predicates:
@@ -64,6 +68,9 @@ spring:
                 allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
                 allowedHeaders: '*'
                 allowCredentials: false
+
+jwt:
+  secret: ${JWT_SECRET}
 
 management:
   endpoints:
