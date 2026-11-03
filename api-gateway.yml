@@ -2,6 +2,12 @@ server:
   port: 8080
 
 spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      connect-timeout: 2s
+      timeout: 2s
   cloud:
     gateway:
       server:
@@ -10,7 +16,7 @@ spring:
             locator:
               enabled: true
               lower-case-service-id: true
-              include-expression: "serviceId matches '(?i)ms-.*'"
+              include-expression: "serviceId matches '(?i)ms-.*' and !(serviceId matches '(?i)ms-turno')"
           default-filters:
             - RewriteLocationResponseHeader=NEVER_STRIP, Location, ,
           routes:
@@ -29,7 +35,18 @@ spring:
             - id: ms-turno
               uri: lb://ms-turno
               predicates:
-                - Path=/api/turnos/**
+                - Path=/api/turnos/**,/ms-turno/**
+              filters:
+                - name: RewritePath
+                  args:
+                    regexp: '/ms-turno/(?<segment>.*)'
+                    replacement: '/$1'
+                - name: RequestRateLimiter
+                  args:
+                    key-resolver: '#{@clientIpKeyResolver}'
+                    redis-rate-limiter.replenishRate: 10
+                    redis-rate-limiter.burstCapacity: 20
+                    redis-rate-limiter.requestedTokens: 1
             - id: ms-dueno-v1
               uri: lb://ms-dueno
               predicates:
